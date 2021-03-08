@@ -155,7 +155,7 @@ function KbxWritePhysicalMemory(
 ): TNtxStatus;
 
 type
-  PhysicalMemory = class abstract
+  KbPhysicalMemory = class abstract
     // Read content of physical memory into a buffer
     class function Read<T>(PhysicalAddress: Pointer; out Buffer: T;
       CachingType: TMemoryCachingType = MmNonCached): TNtxStatus; static;
@@ -480,15 +480,13 @@ begin
     CachingType);
 end;
 
-class function PhysicalMemory.Read<T>(PhysicalAddress: Pointer; out Buffer: T;
-  CachingType: TMemoryCachingType): TNtxStatus;
+class function KbPhysicalMemory.Read<T>;
 begin
   Result := KbxReadPhysicalMemory(PhysicalAddress, @Buffer, SizeOf(Buffer),
     CachingType);
 end;
 
-class function PhysicalMemory.Write<T>(PhysicalAddress: Pointer;
-  const Buffer: T; CachingType: TMemoryCachingType): TNtxStatus;
+class function KbPhysicalMemory.Write<T>;
 begin
   Result := KbxWritePhysicalMemory(PhysicalAddress, @Buffer, SizeOf(Buffer),
     CachingType);
