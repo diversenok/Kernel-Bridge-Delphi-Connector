@@ -237,7 +237,7 @@ function KbReadTscp(
 
 { VirtualMemory }
 
-// Supports both user- and kernel-memory in context of current process:
+// Supports both user- and kernel-memory in context of current process
 
 function KbAllocKernelMemory(
   Size: Cardinal;
