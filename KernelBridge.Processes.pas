@@ -53,6 +53,64 @@ function KbxOpenThreadByPointer(
   ProcessorMode: TProcessorMode = KernelMode
 ): TNtxStatus;
 
+{ ------------------------------- Information ------------------------------- }
+
+// Query variable-size information for a process
+function KbxQueryInformationProcess(
+  hProcess: THandle;
+  InfoClass: TProcessInfoClass;
+  out xMemory: IMemory;
+  InitialBuffer: Cardinal = 0;
+  GrowthMethod: TBufferGrowthMethod = nil
+): TNtxStatus;
+
+// Set variable-size information for a process
+function KbxSetInformationProcess(
+  hProcess: THandle;
+  InfoClass: TProcessInfoClass;
+  Buffer: Pointer;
+  Size: Cardinal
+): TNtxStatus;
+
+type
+  KbProcess = class abstract
+    // Query constant-size information for a process
+    class function Query<T>(hProcess: THandle; InfoClass: TProcessInfoClass;
+      out Buffer: T): TNtxStatus; static;
+
+    // Set constant-size information for a process
+    class function &Set<T>(hProcess: THandle; InfoClass: TProcessInfoClass;
+      const Buffer: T): TNtxStatus; static;
+  end;
+
+// Query variable-size information for a thread
+function KbxQueryInformationThread(
+  hThread: THandle;
+  InfoClass: TThreadInfoClass;
+  out xMemory: IMemory;
+  InitialBuffer: Cardinal = 0;
+  GrowthMethod: TBufferGrowthMethod = nil
+): TNtxStatus;
+
+// Set variable-size information for a process
+function KbxSetInformationThread(
+  hThread: THandle;
+  InfoClass: TThreadInfoClass;
+  Buffer: Pointer;
+  Size: Cardinal
+): TNtxStatus;
+
+type
+  KbThread = class abstract
+    // Query constant-size information for a thread
+    class function Query<T>(hThread: THandle; InfoClass: TThreadInfoClass;
+      out Buffer: T): TNtxStatus; static;
+
+    // Set constant-size information for a thread
+    class function &Set<T>(hThread: THandle; InfoClass: TThreadInfoClass;
+      const Buffer: T): TNtxStatus; static;
+  end;
+
 implementation
 
 uses
@@ -157,5 +215,84 @@ begin
     hxThread := TKbAutoHandle.Capture(hThread);
 end;
 
+function KbxQueryInformationProcess;
+var
+  Required: Cardinal;
+begin
+  Result.Location := 'KbQueryInformationProcess';
+  Result.LastCall.AttachInfoClass(InfoClass);
+
+  xMemory := TAutoMemory.Allocate(InitialBuffer);
+  repeat
+    Required := 0;
+    Result.Win32Result := KbQueryInformationProcess(hProcess, InfoClass,
+      xMemory.Data, xMemory.Size, @Required);
+  until not NtxExpandBufferEx(Result, xMemory, Required, GrowthMethod);
+end;
+
+function KbxSetInformationProcess;
+begin
+  Result.Location := 'KbSetInformationProcess';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbSetInformationProcess(hProcess, InfoClass, Buffer,
+    Size);
+end;
+
+class function KbProcess.Query<T>;
+begin
+  Result.Location := 'KbQueryInformationProcess';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbQueryInformationProcess(hProcess, InfoClass,
+    @Buffer, SizeOf(Buffer), nil);
+end;
+
+class function KbProcess.&Set<T>;
+begin
+  Result.Location := 'KbSetInformationProcess';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbSetInformationProcess(hProcess, InfoClass, @Buffer,
+    SizeOf(Buffer));
+end;
+
+function KbxQueryInformationThread;
+var
+  Required: Cardinal;
+begin
+  Result.Location := 'KbQueryInformationThread';
+  Result.LastCall.AttachInfoClass(InfoClass);
+
+  xMemory := TAutoMemory.Allocate(InitialBuffer);
+  repeat
+    Required := 0;
+    Result.Win32Result := KbQueryInformationThread(hThread, InfoClass,
+      xMemory.Data, xMemory.Size, @Required);
+  until not NtxExpandBufferEx(Result, xMemory, Required, GrowthMethod);
+end;
+
+function KbxSetInformationThread;
+begin
+  Result.Location := 'KbSetInformationThread';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbSetInformationThread(hThread, InfoClass, Buffer,
+    Size);
+end;
+
+{ KbThread }
+
+class function KbThread.Query<T>;
+begin
+  Result.Location := 'KbQueryInformationThread';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbQueryInformationThread(hThread, InfoClass,
+    @Buffer, SizeOf(Buffer), nil);
+end;
+
+class function KbThread.&Set<T>;
+begin
+  Result.Location := 'KbSetInformationThread';
+  Result.LastCall.AttachInfoClass(InfoClass);
+  Result.Win32Result := KbSetInformationThread(hThread, InfoClass, @Buffer,
+    SizeOf(Buffer));
+end;
 
 end.
