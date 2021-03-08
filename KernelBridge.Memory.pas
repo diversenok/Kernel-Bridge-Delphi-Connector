@@ -104,6 +104,67 @@ function KbxMapMemory(
   UserRequestedAddress: Pointer = nil
 ): TNtxStatus;
 
+{ ----------------------------- Physical Memory ----------------------------- }
+
+// Allocate contiguous physical memory in the specified range
+function KbxAllocPhysicalMemory(
+  out Memory: IMemory;
+  LowestAcceptableAddress: Pointer;
+  HighestAcceptableAddress: Pointer;
+  BoundaryAddressMultiple: Pointer;
+  Size: Cardinal;
+  CachingType: TMemoryCachingType
+): TNtxStatus;
+
+// Map physical memory to the kernel address space;
+// to work with it in user-mode, map it with KbxMapMemory
+function KbxMapPhysicalMemory(
+  out VirtualMemory: IMemory;
+  PhysicalMemory: IMemory;
+  Size: Cardinal;
+  CachingType: TMemoryCachingType
+): TNtxStatus;
+
+// Convert a virtual to a physical address in a context of a process
+function KbxGetPhysicalAddress(
+  out PhysicalAddress: Pointer;
+  VirtualAddress: Pointer;
+  Process: PEProcess
+): TNtxStatus;
+
+// Convery a physica to a virtual address
+function KbxGetVirtualForPhysical(
+  out VirtualAddress: Pointer;
+  PhysicalAddress: Pointer
+): TNtxStatus;
+
+// Read content of physical memory into a buffer
+function KbxReadPhysicalMemory(
+  PhysicalAddress: Pointer;
+  Buffer: Pointer;
+  Size: Cardinal;
+  CachingType: TMemoryCachingType = MmNonCached
+): TNtxStatus;
+
+// Write content of a buffer into physical memory
+function KbxWritePhysicalMemory(
+  PhysicalAddress: Pointer;
+  Buffer: Pointer;
+  Size: Cardinal;
+  CachingType: TMemoryCachingType = MmNonCached
+): TNtxStatus;
+
+type
+  PhysicalMemory = class abstract
+    // Read content of physical memory into a buffer
+    class function Read<T>(PhysicalAddress: Pointer; out Buffer: T;
+      CachingType: TMemoryCachingType = MmNonCached): TNtxStatus; static;
+
+    // Write content of a buffer into physical memory
+    class function Write<T>(PhysicalAddress: Pointer; const Buffer: T;
+      CachingType: TMemoryCachingType = MmNonCached): TNtxStatus; static;
+  end;
+
 implementation
 
 uses
@@ -336,6 +397,101 @@ begin
 
   if Result.IsSuccess then
     MappingMemory := TKbMappedAutoMemory.Capture(MappingInfo);
+end;
+
+{ Physica Memory }
+
+type
+  TKbPhysicalAutoMemory = class (TCustomAutoMemory, IMemory)
+    destructor Destroy; override;
+  end;
+
+  TKbMappedPhysicalAutoMemory = class (TCustomAutoMemory, IMemory)
+    destructor Destroy; override;
+  end;
+
+destructor TKbPhysicalAutoMemory.Destroy;
+begin
+  if FAutoRelease then
+    KbFreePhysicalMemory(FAddress);
+
+  inherited;
+end;
+
+destructor TKbMappedPhysicalAutoMemory.Destroy;
+begin
+  if FAutoRelease then
+    KbUnmapPhysicalMemory(FAddress, FSize);
+
+  inherited;
+end;
+
+
+function KbxAllocPhysicalMemory;
+var
+  Address: Pointer;
+begin
+  Result.Location := 'KbAllocPhysicalMemory';
+  Result.Win32Result := KbAllocPhysicalMemory(LowestAcceptableAddress,
+    HighestAcceptableAddress, BoundaryAddressMultiple, Size, CachingType,
+    Address);
+
+  if Result.IsSuccess then
+    Memory := TKbPhysicalAutoMemory.Capture(Address, Size);
+end;
+
+function KbxMapPhysicalMemory;
+var
+  Address: Pointer;
+begin
+  Result.Location := 'KbMapPhysicalMemory';
+  Result.Win32Result := KbMapPhysicalMemory(PhysicalMemory.Data, Size,
+    CachingType, Address);
+
+  if Result.IsSuccess then
+    VirtualMemory := TKbMappedPhysicalAutoMemory.Capture(Address, Size);
+end;
+
+function KbxGetPhysicalAddress;
+begin
+  Result.Location := 'KbGetPhysicalAddress';
+  Result.Win32Result := KbGetPhysicalAddress(Process, VirtualAddress,
+    PhysicalAddress);
+end;
+
+function KbxGetVirtualForPhysical;
+begin
+  Result.Location := 'KbGetVirtualForPhysical';
+  Result.Win32Result := KbGetVirtualForPhysical(PhysicalAddress,
+    VirtualAddress);
+end;
+
+function KbxReadPhysicalMemory;
+begin
+  Result.Location := 'KbReadPhysicalMemory';
+  Result.Win32Result := KbReadPhysicalMemory(PhysicalAddress, Buffer, Size,
+    CachingType);
+end;
+
+function KbxWritePhysicalMemory;
+begin
+  Result.Location := 'KbWritePhysicalMemory';
+  Result.Win32Result := KbWritePhysicalMemory(PhysicalAddress, Buffer, Size,
+    CachingType);
+end;
+
+class function PhysicalMemory.Read<T>(PhysicalAddress: Pointer; out Buffer: T;
+  CachingType: TMemoryCachingType): TNtxStatus;
+begin
+  Result := KbxReadPhysicalMemory(PhysicalAddress, @Buffer, SizeOf(Buffer),
+    CachingType);
+end;
+
+class function PhysicalMemory.Write<T>(PhysicalAddress: Pointer;
+  const Buffer: T; CachingType: TMemoryCachingType): TNtxStatus;
+begin
+  Result := KbxWritePhysicalMemory(PhysicalAddress, @Buffer, SizeOf(Buffer),
+    CachingType);
 end;
 
 end.
