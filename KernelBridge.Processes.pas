@@ -3,20 +3,12 @@ unit KernelBridge.Processes;
 interface
 
 uses
-  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, kbapi, NtUtils;
-
-{ ------------------------------- Descriptors ------------------------------- }
+  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, Ntapi.ntrtl, kbapi, NtUtils;
 
 // Determine the address of EPROCESS structure for a process
 function KbxGetEprocess(
   out eProcess: IMemory;
   ProcessId: TProcessId32
-): TNtxStatus;
-
-// Determine the address of ETHREAD structure for a process
-function KbxGetEthread(
-  out eThread: IMemory;
-  ThreadId: TThreadId32
 ): TNtxStatus;
 
 // Open a process by ID
@@ -36,25 +28,6 @@ function KbxOpenProcessByPointer(
   ProcessorMode: TProcessorMode = KernelMode
 ): TNtxStatus;
 
-// Open a thread by ID
-function KbxOpenThread(
-  out hxThread: IHandle;
-  ThreadId: TProcessId32;
-  Access: TThreadAccessMask;
-  Attributes: TObjectAttributesFlags = 0
-): TNtxStatus;
-
-// Open a thread by a pointer to ETHREAD
-function KbxOpenThreadByPointer(
-  out hxThread: IHandle;
-  Address: PEThread;
-  Access: TThreadAccessMask;
-  Attributes: TObjectAttributesFlags = 0;
-  ProcessorMode: TProcessorMode = KernelMode
-): TNtxStatus;
-
-{ ------------------------------- Information ------------------------------- }
-
 // Query variable-size information for a process
 function KbxQueryInformationProcess(
   hProcess: THandle;
@@ -73,71 +46,36 @@ function KbxSetInformationProcess(
 ): TNtxStatus;
 
 type
-  KbProcess = class abstract
+  KbxProcess = class abstract
     // Query constant-size information for a process
-    class function Query<T>(hProcess: THandle; InfoClass: TProcessInfoClass;
-      out Buffer: T): TNtxStatus; static;
+    class function Query<T>(
+      hProcess: THandle;
+      InfoClass: TProcessInfoClass;
+      out Buffer: T
+    ): TNtxStatus; static;
 
     // Set constant-size information for a process
-    class function &Set<T>(hProcess: THandle; InfoClass: TProcessInfoClass;
-      const Buffer: T): TNtxStatus; static;
+    class function &Set<T>(
+      hProcess: THandle;
+      InfoClass: TProcessInfoClass;
+      const Buffer: T
+    ): TNtxStatus; static;
   end;
 
-// Query variable-size information for a thread
-function KbxQueryInformationThread(
-  hThread: THandle;
-  InfoClass: TThreadInfoClass;
-  out xMemory: IMemory;
-  InitialBuffer: Cardinal = 0;
-  GrowthMethod: TBufferGrowthMethod = nil
+// Suspend all threads in a process
+function KbxSuspendProcess(
+  ProcessId: TProcessId32
 ): TNtxStatus;
 
-// Set variable-size information for a process
-function KbxSetInformationThread(
-  hThread: THandle;
-  InfoClass: TThreadInfoClass;
-  Buffer: Pointer;
-  Size: Cardinal
+// Resume all threads in a process
+function KbxResumeProcess(
+  ProcessId: TProcessId32
 ): TNtxStatus;
-
-type
-  KbThread = class abstract
-    // Query constant-size information for a thread
-    class function Query<T>(hThread: THandle; InfoClass: TThreadInfoClass;
-      out Buffer: T): TNtxStatus; static;
-
-    // Set constant-size information for a thread
-    class function &Set<T>(hThread: THandle; InfoClass: TThreadInfoClass;
-      const Buffer: T): TNtxStatus; static;
-  end;
 
 implementation
 
 uses
-  DelphiUtils.AutoObject;
-
-{ Descriptors }
-
-type
-  TKbAutoObject = class (TCustomAutoMemory, IMemory)
-    procedure Release; override;
-  end;
-
-  TKbAutoHandle = class (TCustomAutoHandle, IHandle)
-    procedure Release; override;
-  end;
-
-procedure TKbAutoObject.Release;
-begin
-  KbDereferenceObject(FAddress);
-  inherited;
-end;
-
-procedure TKbAutoHandle.Release;
-begin
-  KbCloseHandle(FHandle);
-  inherited;
-end;
+  KernelBridge, DelphiUtils.AutoObject;
 
 function KbxGetEprocess;
 var
@@ -148,17 +86,6 @@ begin
 
   if Result.IsSuccess then
     eProcess := TKbAutoObject.Capture(Address, 0);
-end;
-
-function KbxGetEthread;
-var
-  Address: PEThread;
-begin
-  Result.Location := 'KbGetEthread';
-  Result.Win32Result := KbGetEthread(ThreadId, Address);
-
-  if Result.IsSuccess then
-    eThread := TKbAutoObject.Capture(Address, 0);
 end;
 
 function KbxOpenProcess;
@@ -186,31 +113,6 @@ begin
     hxProcess := TKbAutoHandle.Capture(hProcess);
 end;
 
-function KbxOpenThread;
-var
-  hThread: THandle;
-begin
-  Result.Location := 'KbOpenThread';
-  Result.LastCall.AttachAccess<TThreadAccessMask>(Access);
-  Result.Win32Result := KbOpenThread(ThreadId, hThread, Access, Attributes);
-
-  if Result.IsSuccess then
-    hxThread := TKbAutoHandle.Capture(hThread);
-end;
-
-function KbxOpenThreadByPointer;
-var
-  hThread: THandle;
-begin
-  Result.Location := 'KbOpenThreadByPointer';
-  Result.LastCall.AttachAccess<TThreadAccessMask>(Access);
-  Result.Win32Result := KbOpenThreadByPointer(Address, hThread, Access,
-    Attributes, ProcessorMode);
-
-  if Result.IsSuccess then
-    hxThread := TKbAutoHandle.Capture(hThread);
-end;
-
 function KbxQueryInformationProcess;
 var
   Required: Cardinal;
@@ -234,7 +136,7 @@ begin
     Size);
 end;
 
-class function KbProcess.Query<T>;
+class function KbxProcess.Query<T>;
 begin
   Result.Location := 'KbQueryInformationProcess';
   Result.LastCall.AttachInfoClass(InfoClass);
@@ -242,7 +144,7 @@ begin
     @Buffer, SizeOf(Buffer), nil);
 end;
 
-class function KbProcess.&Set<T>;
+class function KbxProcess.&Set<T>;
 begin
   Result.Location := 'KbSetInformationProcess';
   Result.LastCall.AttachInfoClass(InfoClass);
@@ -250,45 +152,16 @@ begin
     SizeOf(Buffer));
 end;
 
-function KbxQueryInformationThread;
-var
-  Required: Cardinal;
+function KbxSuspendProcess;
 begin
-  Result.Location := 'KbQueryInformationThread';
-  Result.LastCall.AttachInfoClass(InfoClass);
-
-  xMemory := TAutoMemory.Allocate(InitialBuffer);
-  repeat
-    Required := 0;
-    Result.Win32Result := KbQueryInformationThread(hThread, InfoClass,
-      xMemory.Data, xMemory.Size, @Required);
-  until not NtxExpandBufferEx(Result, xMemory, Required, GrowthMethod);
+  Result.Location := 'KbSuspendProcess';
+  Result.Win32Result := KbSuspendProcess(ProcessId);
 end;
 
-function KbxSetInformationThread;
+function KbxResumeProcess;
 begin
-  Result.Location := 'KbSetInformationThread';
-  Result.LastCall.AttachInfoClass(InfoClass);
-  Result.Win32Result := KbSetInformationThread(hThread, InfoClass, Buffer,
-    Size);
-end;
-
-{ KbThread }
-
-class function KbThread.Query<T>;
-begin
-  Result.Location := 'KbQueryInformationThread';
-  Result.LastCall.AttachInfoClass(InfoClass);
-  Result.Win32Result := KbQueryInformationThread(hThread, InfoClass,
-    @Buffer, SizeOf(Buffer), nil);
-end;
-
-class function KbThread.&Set<T>;
-begin
-  Result.Location := 'KbSetInformationThread';
-  Result.LastCall.AttachInfoClass(InfoClass);
-  Result.Win32Result := KbSetInformationThread(hThread, InfoClass, @Buffer,
-    SizeOf(Buffer));
+  Result.Location := 'KbResumeProcess';
+  Result.Win32Result := KbResumeProcess(ProcessId);
 end;
 
 end.

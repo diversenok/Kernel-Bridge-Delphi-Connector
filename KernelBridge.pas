@@ -3,7 +3,16 @@ unit KernelBridge;
 interface
 
 uses
-  kbapi, NtUtils;
+  kbapi, NtUtils, DelphiUtils.AutoObject;
+
+type
+  TKbAutoObject = class (TCustomAutoMemory, IMemory)
+    procedure Release; override;
+  end;
+
+  TKbAutoHandle = class (TCustomAutoHandle, IHandle)
+    procedure Release; override;
+  end;
 
 // Load Kernel Bridge as a driver
 function KbxLoadAsDriver(
@@ -20,9 +29,6 @@ function KbxLoadAsFilter(
 
 implementation
 
-uses
-  DelphiUtils.AutoObject;
-
 type
   TKbAutoDriver = class (TCustomAutoReleasable, IAutoReleasable)
     procedure Release; override;
@@ -31,6 +37,18 @@ type
 procedure TKbAutoDriver.Release;
 begin
   KbUnload;
+  inherited;
+end;
+
+procedure TKbAutoObject.Release;
+begin
+  KbDereferenceObject(FAddress);
+  inherited;
+end;
+
+procedure TKbAutoHandle.Release;
+begin
+  KbCloseHandle(FHandle);
   inherited;
 end;
 
