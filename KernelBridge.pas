@@ -27,7 +27,18 @@ function KbxLoadAsFilter(
   Altitude: String = '260000'
 ): TNtxStatus;
 
+// Execute the specified function in Ring0 in a SEH-section with a FPU-safe
+// context in the context of the current process
+function KbxExecuteShellCode(
+  ShellCode: TShellCode;
+  Argument: Pointer;
+  LocationMessage: String = 'Shellcode'
+): TNtxStatus;
+
 implementation
+
+uses
+  Ntapi.ntdef;
 
 type
   TKbAutoDriver = class (TCustomAutoReleasable, IAutoReleasable)
@@ -69,6 +80,21 @@ begin
 
   if Result.IsSuccess then
     Driver := TKbAutoDriver.Create;
+end;
+
+function KbxExecuteShellCode;
+var
+  Status: NTSTATUS;
+begin
+  Result.Location := 'KbExecuteShellCode';
+  Result.Win32Result := KbExecuteShellCode(ShellCode, Argument, Status);
+
+  if Result.IsSuccess then
+  begin
+    // Forward the result
+    Result.Location := LocationMessage;
+    Result.Status := Status;
+  end;
 end;
 
 end.

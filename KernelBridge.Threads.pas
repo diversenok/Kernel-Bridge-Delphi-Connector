@@ -100,6 +100,13 @@ function KbxSetThreadContext(
   ProcessorMode: TProcessorMode = UserMode
 ): TNtxStatus;
 
+// Queue a user APC for a thread
+function KbxQueueUserApc(
+  ThreadId: TThreadId32;
+  ApcProc: TUserApcProc;
+  Argument: Pointer
+): TNtxStatus;
+
 implementation
 
 uses
@@ -241,6 +248,12 @@ begin
   Result.Location := 'KbSetThreadContext';
   Result.Win32Result := KbSetThreadContext(ThreadId, Context, SizeOf(TContext),
     ProcessorMode);
+end;
+
+function KbxQueueUserApc;
+begin
+  Result.Location := 'KbQueueUserApc';
+  Result.Win32Result := KbQueueUserApc(ThreadId, ApcProc, Argument);
 end;
 
 end.
