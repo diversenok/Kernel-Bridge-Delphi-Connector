@@ -120,26 +120,22 @@ uses
 
 type
   TKbAutoObject = class (TCustomAutoMemory, IMemory)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbAutoHandle = class (TCustomAutoHandle, IHandle)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
-destructor TKbAutoObject.Destroy;
+procedure TKbAutoObject.Release;
 begin
-  if FAutoRelease then
-    KbDereferenceObject(FAddress);
-
+  KbDereferenceObject(FAddress);
   inherited;
 end;
 
-destructor TKbAutoHandle.Destroy;
+procedure TKbAutoHandle.Release;
 begin
-  if FAutoRelease then
-    KbCloseHandle(FHandle);
-
+  KbCloseHandle(FHandle);
   inherited;
 end;
 

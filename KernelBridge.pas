@@ -25,14 +25,12 @@ uses
 
 type
   TKbAutoDriver = class (TCustomAutoReleasable, IAutoReleasable)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
-destructor TKbAutoDriver.Destroy;
+procedure TKbAutoDriver.Release;
 begin
-  if FAutoRelease then
-    KbUnload;
-
+  KbUnload;
   inherited;
 end;
 

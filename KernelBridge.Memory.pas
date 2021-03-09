@@ -174,26 +174,22 @@ uses
 
 type
   TKbAutoMemory = class (TCustomAutoMemory, IMemory)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbNonCachedAutoMemory = class (TCustomAutoMemory, IMemory)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
-destructor TKbAutoMemory.Destroy;
+procedure TKbAutoMemory.Release;
 begin
-  if FAutoRelease then
-    KbFreeKernelMemory(FAddress);
-
+  KbFreeKernelMemory(FAddress);
   inherited;
 end;
 
-destructor TKbNonCachedAutoMemory.Destroy;
+procedure TKbNonCachedAutoMemory.Release;
 begin
-  if FAutoRelease then
-    KbFreeNonCachedMemory(FAddress, FSize);
-
+  KbFreeNonCachedMemory(FAddress, FSize);
   inherited;
 end;
 
@@ -244,13 +240,13 @@ type
     FMdl: Pointer;
     function GetMdl: Pointer;
     constructor Capture(pMdl: Pointer);
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbAutoMdlLock = class (TCustomAutoReleasable, IAutoReleasable)
     FMdl: IMdl;
     constructor Create(Mdl: IMdl);
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbMappedAutoMdl = class (TCustomAutoMemory, IMappedMdl)
@@ -258,14 +254,14 @@ type
     FNeedUnlock: Boolean;
     function GetMdl: Pointer;
     constructor Capture(Mdl: IMdl; MappedAddress: Pointer; NeedUnlock: Boolean);
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbMappedAutoMemory = class (TCustomAutoMemory, IMappedMdl)
     FMdl: PMdl;
     function GetMdl: Pointer;
     constructor Capture(MappingInfo: TMappingInfo);
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
 constructor TKbAutoMdl.Capture;
@@ -274,11 +270,9 @@ begin
   FMdl := pMdl;
 end;
 
-destructor TKbAutoMdl.Destroy;
+procedure TKbAutoMdl.Release;
 begin
-  if FAutoRelease then
-    KbFreeMdl(FMdl);
-
+  KbFreeMdl(FMdl);
   inherited;
 end;
 
@@ -293,11 +287,9 @@ begin
   FMdl := Mdl;
 end;
 
-destructor TKbAutoMdlLock.Destroy;
+procedure TKbAutoMdlLock.Release;
 begin
-  if FAutoRelease then
-    KbUnlockPages(FMdl.Mdl);
-
+  KbUnlockPages(FMdl.Mdl);
   inherited;
 end;
 
@@ -308,11 +300,9 @@ begin
   FNeedUnlock := NeedUnlock;
 end;
 
-destructor TKbMappedAutoMdl.Destroy;
+procedure TKbMappedAutoMdl.Release;
 begin
-  if FAutoRelease then
-    KbUnmapMdl(FMdl.Mdl, FAddress, FNeedUnlock);
-
+  KbUnmapMdl(FMdl.Mdl, FAddress, FNeedUnlock);
   inherited;
 end;
 
@@ -327,17 +317,13 @@ begin
   FMdl := MappingInfo.Mdl;
 end;
 
-destructor TKbMappedAutoMemory.Destroy;
+procedure TKbMappedAutoMemory.Release;
 var
   MappingInfo: TMappingInfo;
 begin
-  if FAutoRelease then
-  begin
-    MappingInfo.MappedAddress := FAddress;
-    MappingInfo.Mdl := FMdl;
-    KbUnmapMemory(MappingInfo)
-  end;
-
+  MappingInfo.MappedAddress := FAddress;
+  MappingInfo.Mdl := FMdl;
+  KbUnmapMemory(MappingInfo);
   inherited;
 end;
 
@@ -403,26 +389,22 @@ end;
 
 type
   TKbPhysicalAutoMemory = class (TCustomAutoMemory, IMemory)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
   TKbMappedPhysicalAutoMemory = class (TCustomAutoMemory, IMemory)
-    destructor Destroy; override;
+    procedure Release; override;
   end;
 
-destructor TKbPhysicalAutoMemory.Destroy;
+procedure TKbPhysicalAutoMemory.Release;
 begin
-  if FAutoRelease then
-    KbFreePhysicalMemory(FAddress);
-
+  KbFreePhysicalMemory(FAddress);
   inherited;
 end;
 
-destructor TKbMappedPhysicalAutoMemory.Destroy;
+procedure TKbMappedPhysicalAutoMemory.Release;
 begin
-  if FAutoRelease then
-    KbUnmapPhysicalMemory(FAddress, FSize);
-
+  KbUnmapPhysicalMemory(FAddress, FSize);
   inherited;
 end;
 
