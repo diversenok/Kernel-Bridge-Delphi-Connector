@@ -3,7 +3,7 @@ unit KernelBridge;
 interface
 
 uses
-  kbapi, NtUtils, DelphiUtils.AutoObject;
+  KernelBridgeApi, NtUtils, DelphiUtils.AutoObject;
 
 type
   TKbAutoObject = class (TCustomAutoMemory, IMemory)

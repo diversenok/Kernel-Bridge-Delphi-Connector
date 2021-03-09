@@ -3,7 +3,8 @@ unit KernelBridge.Processes;
 interface
 
 uses
-  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, Ntapi.ntrtl, kbapi, NtUtils;
+  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, Ntapi.ntrtl, KernelBridgeApi,
+  NtUtils;
 
 // Determine the address of EPROCESS structure for a process
 function KbxGetEprocess(

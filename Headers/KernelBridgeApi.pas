@@ -1,4 +1,4 @@
-unit kbapi;
+unit KernelBridgeApi;
 
 {$MINENUMSIZE 4}
 

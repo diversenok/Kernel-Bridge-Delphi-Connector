@@ -3,7 +3,7 @@ unit KernelBridge.Threads;
 interface
 
 uses
-  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, Ntapi.ntrtl, kbapi,
+  Winapi.WinNt, Ntapi.ntdef, Ntapi.ntpsapi, Ntapi.ntrtl, KernelBridgeApi,
   NtUtils, NtUtils.Threads;
 
 type

@@ -3,7 +3,7 @@ unit KernelBridge.Memory;
 interface
 
 uses
-  Winapi.WinNt, Ntapi.ntmmapi, kbapi, NtUtils;
+  Winapi.WinNt, Ntapi.ntmmapi, KernelBridgeApi, NtUtils;
 
 type
   IMdl = interface (IAutoReleasable)

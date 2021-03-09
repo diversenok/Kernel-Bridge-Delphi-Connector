@@ -3,7 +3,7 @@ unit KernelBridge.Processes.Memory;
 interface
 
 uses
-  Winapi.WinNt, Ntapi.ntmmapi, kbapi, NtUtils;
+  Winapi.WinNt, Ntapi.ntmmapi, KernelBridgeApi, NtUtils;
 
 // Allocare user-mode memory in a process
 function KbxAllocUserMemory(
@@ -15,7 +15,7 @@ function KbxAllocUserMemory(
 
 // Block attempts to change memory protection
 function KbxSecureVirtualMemory(
-  out SecureHandle: IAutoReleasable;
+  out SecureHandle: IHandle;
   ProcessId: TProcessId32;
   BaseAddress: Pointer;
   Size: Cardinal;
@@ -155,7 +155,7 @@ end;
 class function KbxProcessMemory.Write<T>;
 begin
   Result.Location := 'KbWriteProcessMemory';
-  Result.Win32Result := KbWriteProcessMemory(ProcessId, BaseAddress, Buffer,
+  Result.Win32Result := KbWriteProcessMemory(ProcessId, BaseAddress, @Buffer,
     SizeOf(Buffer), PerformCopyOnWrite);
 end;
 
