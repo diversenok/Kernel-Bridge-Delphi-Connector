@@ -114,7 +114,7 @@ begin
     AllocationType, Win32Protect);
 
   if Result.IsSuccess then
-    Result := TKbAutoSection.Create(hxProcess, BaseAddress);
+    MappedSection := TKbAutoSection.Create(hxProcess, BaseAddress);
 end;
 
 function KbxUnmapViewOfSection;

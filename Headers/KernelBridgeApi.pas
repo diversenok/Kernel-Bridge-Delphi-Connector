@@ -9,7 +9,7 @@ uses
   DelphiApi.Reflection;
 
 const
-  kernelbridge = 'Kernel-Bridge.sys';
+  kernelbridgesys = 'Kernel-Bridge.sys';
   userbridge = 'User-Bridge.dll';
 
 type
