@@ -151,6 +151,7 @@
         <DCCReference Include="..\..\KernelBridge.Threads.pas"/>
         <DCCReference Include="ParentTokenId.Helper.pas"/>
         <DCCReference Include="ParentTokenId.Main.pas"/>
+        <DCCReference Include="..\..\KernelBridge.Memory.Mdl.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

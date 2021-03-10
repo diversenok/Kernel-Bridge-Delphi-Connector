@@ -64,7 +64,8 @@ uses
   KernelBridge.Section in '..\..\KernelBridge.Section.pas',
   KernelBridge.Threads in '..\..\KernelBridge.Threads.pas',
   ParentTokenId.Helper in 'ParentTokenId.Helper.pas',
-  ParentTokenId.Main in 'ParentTokenId.Main.pas';
+  ParentTokenId.Main in 'ParentTokenId.Main.pas',
+  KernelBridge.Memory.Mdl in '..\..\KernelBridge.Memory.Mdl.pas';
 
 function Report(const Status: TNtxStatus): String;
 begin
