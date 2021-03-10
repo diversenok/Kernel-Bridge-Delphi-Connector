@@ -36,7 +36,7 @@ function KbxCopyMoveMemory(
   Dest: Pointer;
   Src: Pointer;
   Size: Cardinal;
-  Intersects: Boolean
+  Intersects: Boolean = False
 ): TNtxStatus;
 
 // Fill user- or kernel- memory in the context of current process
@@ -53,6 +53,23 @@ function KbxEqualMemory(
   Size: Cardinal;
   out Equals: Boolean
 ): TNtxStatus;
+
+type
+  KbxMemory = class abstract
+    // Copy memory from an address to a buffer
+    class function Read<T>(
+      Address: Pointer;
+      out Buffer: T;
+      Intersects: Boolean = False
+    ): TNtxStatus; static;
+
+    // Copy memory from a buffer to an address
+    class function Write<T>(
+      Address: Pointer;
+      const Buffer: T;
+      Intersects: Boolean = False
+    ): TNtxStatus; static;
+  end;
 
 { ----------------------------------- Mdl ----------------------------------- }
 
@@ -231,6 +248,20 @@ function KbxEqualMemory;
 begin
   Result.Location := 'KbEqualMemory';
   Result.Win32Result := KbEqualMemory(Src, Dest, Size, Equals);
+end;
+
+class function KbxMemory.Read<T>;
+begin
+  Result.Location := 'KbCopyMoveMemory';
+  Result.Win32Result := KbCopyMoveMemory(@Buffer, Address, SizeOf(Buffer),
+    Intersects);
+end;
+
+class function KbxMemory.Write<T>;
+begin
+  Result.Location := 'KbCopyMoveMemory';
+  Result.Win32Result := KbCopyMoveMemory(Address, @Buffer, SizeOf(Buffer),
+    Intersects);
 end;
 
 { Mdl }
