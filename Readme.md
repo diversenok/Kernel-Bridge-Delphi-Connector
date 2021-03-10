@@ -1,12 +1,12 @@
 # Kernel-Bridge Delphi Connector
 
-This project is a library for using the user-mode side of the API provided by [Kernel Bridge](https://github.com/HoShiMin/Kernel-Bridge) with Delphi. It allows manipulating processes and threads from kernel-mode, contains functions for directly manipulating kernel and physical memory, and more.
+This project is a library for using the user-mode side of the API provided by **[Kernel Bridge](https://github.com/HoShiMin/Kernel-Bridge)** with Delphi. It allows manipulating processes and threads from kernel-mode, contains functions for directly manipulating kernel and physical memory, and more.
 
 ## Content
 
 The library includes a single header file — **KernelBridgeApi.pas** — a translated version of definitions for the functions exported by **User-Bridge.dll**. Although this file depends on the headers from NtUtils, it should be simple to inline and remove those dependencies if necessary.
 
-The rest files are the wrappers that allow better integration of the functionality into the language and automated resource lifetime management. These modules are an extension of my [NtUtils library](https://github.com/diversenok/NtUtilsLibrary).
+The rest files are the wrappers that allow better integration of the functionality into the language and automated resource lifetime management. These modules are an extension of my **[NtUtils library](https://github.com/diversenok/NtUtilsLibrary)**.
 
 File                                  | Description
 ------------------------------------- | ------------
