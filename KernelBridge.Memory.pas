@@ -209,7 +209,7 @@ begin
     Intersects);
 end;
 
-{ Physica Memory }
+{ Physical Memory }
 
 type
   TKbPhysicalAutoMemory = class (TCustomAutoMemory, IMemory)
@@ -231,7 +231,6 @@ begin
   KbUnmapPhysicalMemory(FAddress, FSize);
   inherited;
 end;
-
 
 function KbxAllocPhysicalMemory;
 var

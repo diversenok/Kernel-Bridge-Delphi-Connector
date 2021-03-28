@@ -45,6 +45,12 @@
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+        <Cfg_2_Win64>true</Cfg_2_Win64>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
@@ -55,6 +61,9 @@
         <DCC_K>false</DCC_K>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <SanitizedProjectName>ParentTokenId</SanitizedProjectName>
+        <DCC_UnitSearchPath>..\..\NtUtils;..\..\NtUtils\Headers;..\..\Headers;..\..;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <VerInfo_Locale>1049</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=An example application in Delphi for using the Kernel-Bridge framework.;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>DBXSqliteDriver;IndyIPCommon;RESTComponents;bindcompdbx;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;svnui;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;FireDAC;vcltouch;vcldb;bindcompfmx;svn;FireDACSqliteDriver;FireDACPgDriver;inetdb;soaprtl;DbxCommonDriver;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
@@ -99,71 +108,14 @@
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+    </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\..\NtUtils\Headers\DelphiApi.Reflection.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntdbg.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntdef.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntexapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntioapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntkeapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntldr.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntmmapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntobapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntpebteb.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntpsapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntrtl.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntseapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntstatus.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Ntapi.ntwow64.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\NtUtils.Version.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.ConsoleApi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.ntlsa.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.NtSecApi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.ProcessThreadsApi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.Sddl.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.securitybaseapi.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.Shell.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.WinBase.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.WinError.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.WinNt.pas"/>
-        <DCCReference Include="..\..\NtUtils\Headers\Winapi.WinUser.pas"/>
-        <DCCReference Include="..\..\NtUtils\DelphiUtils.Arrays.pas"/>
-        <DCCReference Include="..\..\NtUtils\DelphiUtils.Async.pas"/>
-        <DCCReference Include="..\..\NtUtils\DelphiUtils.AutoObject.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Ldr.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Lsa.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Lsa.Sid.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Objects.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Objects.Snapshots.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Processes.Memory.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Processes.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Processes.Query.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Security.Acl.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Security.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Security.Sid.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.System.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.SysUtils.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Threads.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Tokens.Impersonate.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Tokens.Misc.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Tokens.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUtils.Tokens.Query.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUiLib\DelphiUiLib.Strings.pas"/>
-        <DCCReference Include="..\..\NtUtils\NtUiLib\NtUiLib.Errors.pas"/>
-        <DCCReference Include="..\..\Headers\KernelBridgeApi.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Memory.pas"/>
-        <DCCReference Include="..\..\KernelBridge.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Processes.Memory.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Processes.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Section.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Threads.pas"/>
-        <DCCReference Include="ParentTokenId.Helper.pas"/>
-        <DCCReference Include="ParentTokenId.Main.pas"/>
-        <DCCReference Include="..\..\KernelBridge.Memory.Mdl.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -184,6 +136,10 @@
                 <Source>
                     <Source Name="MainSource">ParentTokenId.dpr</Source>
                 </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="Win32\Debug\ParentTokenId.exe" Configuration="Debug" Class="ProjectOutput">
@@ -204,6 +160,12 @@
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\iossimulator\libpcre.dylib" Class="DependencyModule">
                     <Platform Name="iOSSimulator">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win64\Release\ParentTokenId.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win64">
+                        <RemoteName>ParentTokenId.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
